@@ -9,6 +9,27 @@ import (
 	"math/big"
 )
 
+var (
+	Difficulty=25
+)
+
+
+type Block struct {
+	Hash 		[]byte  `json:"hash"`
+	PrevHash 	[]byte	`json:"prev_hash"`
+	Data 		[]byte  `json:"data"`
+	Nonce    	int		`json:"nonce"`
+}
+
+type BlockChain struct {
+	Blocks []*Block
+}
+
+type ProofOfWord struct {
+	Block *Block
+	Target *big.Int
+}
+
 func (b *Block) DeriveHash(){
 	info:=bytes.Join([][]byte{b.Data,b.PrevHash},[]byte{})
 	hash:=sha256.Sum256(info)
