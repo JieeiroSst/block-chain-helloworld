@@ -9,21 +9,6 @@ import (
 	"math/big"
 )
 
-var (
-	Difficulty=25
-)
-
-type Block struct {
-	Hash 		[]byte  `json:"hash"`
-	PrevHash 	[]byte	`json:"prev_hash"`
-	Data 		[]byte  `json:"data"`
-	Nonce    	int		`json:"nonce"`
-}
-
-type BlockChain struct {
-	Blocks []*Block
-}
-
 func (b *Block) DeriveHash(){
 	info:=bytes.Join([][]byte{b.Data,b.PrevHash},[]byte{})
 	hash:=sha256.Sum256(info)
@@ -59,26 +44,6 @@ func InitBlockChain() *BlockChain {
 	return &BlockChain{Blocks:[]*Block{Genesis()}}
 }
 
-func main(){
-	chain:=InitBlockChain()
-
-	chain.AddBlock("first block after genesis")
-	chain.AddBlock("second block after genesis")
-	chain.AddBlock("third block after genesis")
-
-	for _,block:=range chain.Blocks{
-		fmt.Printf("Previous hash: %x\n", block.PrevHash)
-		fmt.Printf("data: %s\n", block.Data)
-		fmt.Printf("hash: %x\n", block.Hash)
-		fmt.Println("\n")
-	}
-}
-
-type ProofOfWord struct {
-	Block *Block
-	Target *big.Int
-}
-
 func NewProofOfWord(b *Block) *ProofOfWord {
 	target:=big.NewInt(1)
 	target.Lsh(target,uint(256-Difficulty))
@@ -104,6 +69,7 @@ func (pow *ProofOfWord) InitNonce(nonce int) []byte{
 			ToHex(int64(Difficulty)),
 		},[]byte{},
 		)
+	fmt.Println()
 	return data
 }
 
@@ -130,4 +96,19 @@ func (pow *ProofOfWord) Validate() bool{
 	hash:=pow.InitNonce(pow.Block.Nonce)
 	intHash.SetBytes(hash[:])
 	return intHash.Cmp(pow.Target) == -1
+}
+
+func main(){
+	chain:=InitBlockChain()
+
+	chain.AddBlock("first block after genesis")
+	chain.AddBlock("second block after genesis")
+	chain.AddBlock("third block after genesis")
+
+	for _,block:=range chain.Blocks{
+		fmt.Printf("Previous hash: %x\n", block.PrevHash)
+		fmt.Printf("data: %s\n", block.Data)
+		fmt.Printf("hash: %x\n", block.Hash)
+		fmt.Println("\n")
+	}
 }
